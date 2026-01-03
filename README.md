@@ -24,17 +24,17 @@ Windows uygulamalarınızı tek tıkla güncel tutmanızı sağlayan, **Acrylic 
 
 
 ## 🚀 Kurulum ve Çalıştırma
-- **1. Kütüphaneleri Yükleyin
+- **1. Kütüphaneleri Yükleyin**
 Uygulamanın çalışması için gerekli tüm bağımlılıkları terminale (CMD veya PowerShell) aşağıdaki komutu yapıştırarak kurun:
 ```
 pip install customtkinter Pillow requests pywinstyles
 ```
-- **2. Uygulamayı Başlatın
+- **2. Uygulamayı Başlatın**
 Kütüphane kurulumu tamamlandıktan sonra, projenin bulunduğu dizinde şu komutu çalıştırarak arayüzü başlatabilirsiniz:
 ```
 python winget_upgrade_gui.py
 ```
-- **3. Çalıştırma
+- **3. Çalıştırma**
 Proje klasöründe terminali açın ve uygulamayı başlatın:
 ```
 python winget_upgrade_gui.py
