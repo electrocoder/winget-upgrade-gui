@@ -65,7 +65,7 @@ def get_upgrades():
         messagebox.showerror("Error", f"Failed to get upgrades: {str(e)}")
         return []
 
-def update_package(pkg_id, progress_var, status_label, progress_bar, progress_frame, pkg_name):
+def update_package(pkg_id, progress_var, status_label, progress_bar):
     try:
         process = subprocess.Popen(["winget", "upgrade", "--id", pkg_id, "--silent"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         
@@ -79,20 +79,17 @@ def update_package(pkg_id, progress_var, status_label, progress_bar, progress_fr
         
         process.communicate()
         if process.returncode == 0:
-            messagebox.showinfo("Success", f"Updated package: {pkg_name}")
-            progress_frame.config(background='#90EE90')  # Light green background on completion
+            messagebox.showinfo("Success", f"Updated package with ID: {pkg_id}")
         else:
-            messagebox.showerror("Error", f"Failed to update {pkg_name}")
+            messagebox.showerror("Error", f"Failed to update {pkg_id}")
     except Exception as e:
         messagebox.showerror("Error", f"Failed to update: {str(e)}")
     finally:
         progress_var.set(100)  # Complete
 
-def run_update(pkg_id, progress_frame, progress_var, status_label, progress_bar, pkg_name):
+def run_update(pkg_id, progress_frame, progress_var, status_label, progress_bar):
     progress_frame.pack(pady=10, fill=tk.X)
-    progress_frame.config(background='#e6f2ff')  # Reset background
-    status_label.config(text=f"Updating \033[32m{pkg_name}\033[0m...")  # Green name (but Tkinter doesn't support ANSI, so use foreground)
-    status_label.config(foreground='green')  # Set text color to green for the name
+    status_label.config(text=f"Updating {pkg_id}...")
     progress_var.set(0)
     
     # Simulate progress since winget doesn't provide percentage
@@ -102,17 +99,17 @@ def run_update(pkg_id, progress_frame, progress_var, status_label, progress_bar,
             root.after(50)  # Fake delay
     
     threading.Thread(target=simulate_progress).start()
-    threading.Thread(target=update_package, args=(pkg_id, progress_var, status_label, progress_bar, progress_frame, pkg_name)).start()
+    threading.Thread(target=update_package, args=(pkg_id, progress_var, status_label, progress_bar)).start()
 
 def update_selected(progress_frame, progress_var, status_label, progress_bar):
-    selected = [(pkg_id, next(pkg['name'] for pkg in upgrades if pkg['id'] == pkg_id)) for pkg_id, var in check_vars.items() if var.get()]
-    for pkg_id, pkg_name in selected:
-        run_update(pkg_id, progress_frame, progress_var, status_label, progress_bar, pkg_name)
+    selected = [pkg_id for pkg_id, var in check_vars.items() if var.get()]
+    for pkg_id in selected:
+        run_update(pkg_id, progress_frame, progress_var, status_label, progress_bar)
 
 def update_all(progress_frame, progress_var, status_label, progress_bar):
-    all_packages = [(pkg['id'], pkg['name']) for pkg in upgrades]
-    for pkg_id, pkg_name in all_packages:
-        run_update(pkg_id, progress_frame, progress_var, status_label, progress_bar, pkg_name)
+    all_ids = list(check_vars.keys())
+    for pkg_id in all_ids:
+        run_update(pkg_id, progress_frame, progress_var, status_label, progress_bar)
 
 def refresh_list():
     global check_vars, upgrades, scrollable_frame
@@ -142,7 +139,7 @@ def refresh_list():
             ttk.Label(frame, text=pkg['version'], width=15, anchor='w', background=colors[i % 2]).pack(side=tk.LEFT)
             ttk.Label(frame, text=pkg['available'], width=15, anchor='w', background=colors[i % 2]).pack(side=tk.LEFT)
             
-            update_btn = ttk.Button(frame, text="Güncelle", command=lambda p=pkg: run_update(p['id'], progress_frame, progress_var, status_label, progress_bar, p['name']))
+            update_btn = ttk.Button(frame, text="Güncelle", command=lambda p=pkg: run_update(p['id'], progress_frame, progress_var, status_label, progress_bar))
             update_btn.pack(side=tk.LEFT, padx=5)
     
     # Update scroll region
@@ -227,7 +224,7 @@ else:
         ttk.Label(frame, text=pkg['version'], width=15, anchor='w', background=colors[i % 2]).pack(side=tk.LEFT)
         ttk.Label(frame, text=pkg['available'], width=15, anchor='w', background=colors[i % 2]).pack(side=tk.LEFT)
         
-        update_btn = ttk.Button(frame, text="Güncelle", command=lambda p=pkg: run_update(p['id'], progress_frame, progress_var, status_label, progress_bar, p['name']))
+        update_btn = ttk.Button(frame, text="Güncelle", command=lambda p=pkg: run_update(p['id'], progress_frame, progress_var, status_label, progress_bar))
         update_btn.pack(side=tk.LEFT, padx=5)
 
 # Bottom buttons (fixed at bottom)
